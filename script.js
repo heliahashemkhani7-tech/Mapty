@@ -1,18 +1,18 @@
-'use strict';
+"use strict";
 
 // prettier-ignore
 
 const form = document.querySelector('.form');
-const containerWorkouts = document.querySelector('.workouts');
-const inputType = document.querySelector('.form__input--type');
-const inputDistance = document.querySelector('.form__input--distance');
-const inputDuration = document.querySelector('.form__input--duration');
-const inputCadence = document.querySelector('.form__input--cadence');
-const inputElevation = document.querySelector('.form__input--elevation');
+const containerWorkouts = document.querySelector(".workouts");
+const inputType = document.querySelector(".form__input--type");
+const inputDistance = document.querySelector(".form__input--distance");
+const inputDuration = document.querySelector(".form__input--duration");
+const inputCadence = document.querySelector(".form__input--cadence");
+const inputElevation = document.querySelector(".form__input--elevation");
 
-class workouts {
+class Workouts {
   date = new Date();
-  id = (Date.now() + '').slice(-10);
+  id = (Date.now() + "").slice(-10);
 
   constructor(coords, distance, duration) {
     this.coords = coords;
@@ -24,14 +24,14 @@ class workouts {
     // prettier-ignore
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    this.descriotion = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
   }
 }
 
-class Running extends workouts {
-  type = 'running';
+class Running extends Workouts {
+  type = "running";
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
@@ -44,8 +44,8 @@ class Running extends workouts {
     return this.pace;
   }
 }
-class Cycling extends workouts {
-  type = 'Cycling';
+class Cycling extends Workouts {
+  type = "cycling";
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
@@ -66,8 +66,8 @@ class App {
   constructor() {
     this._getPosition();
 
-    form.addEventListener('submit', this._newWorkout.bind(this));
-    inputType.addEventListener('change', this._toggleElevationFeild.bind(this));
+    form.addEventListener("submit", this._newWorkout.bind(this));
+    inputType.addEventListener("change", this._toggleElevationFeild.bind(this));
   }
 
   _getPosition() {
@@ -75,7 +75,7 @@ class App {
       navigator.geolocation.getCurrentPosition(
         this._loadMap.bind(this),
         function () {
-          alert('Error');
+          alert("Error");
         }
       );
     }
@@ -85,36 +85,37 @@ class App {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
-    this.#map = L.map('map').setView(coords, 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    this.#map = L.map("map").setView(coords, 13);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
-    this.#map.on('click', this._showForm.bind(this));
+    this.#map.on("click", this._showForm.bind(this));
   }
 
   _showForm(mapE) {
     this.#mapEvent = mapE;
-    form.classList.remove('hidden');
+    form.classList.remove("hidden");
     inputDistance.focus();
   }
   _hideForm() {
     // prettier-ignore
     inputDistance.value = inputDuration.value = inputElevation.value = inputCadence.value ='';
-    form.style.display = 'none';
-    form.classList.add('hidden');
-    setTimeout(() => (form.style.display = 'grid'), 1000);
+    form.style.display = "none";
+    form.classList.add("hidden");
+    setTimeout(() => (form.style.display = "grid"), 1000);
   }
   _toggleElevationFeild() {
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
   }
 
   _newWorkout(e) {
     const validNumber = (...inputs) =>
-      inputs.every(inp => Number.isFinite(inp));
+      inputs.every((inp) => Number.isFinite(inp));
 
-    const posNumber = (...inputs) => inputs.every(inp => inp > 0);
+    const posNumber = (...inputs) => inputs.every((inp) => inp > 0);
 
     e.preventDefault();
 
@@ -123,22 +124,21 @@ class App {
     const duration = +inputDuration.value;
     const { lat, lng } = this.#mapEvent.latlng;
     let workout;
-    if (type === 'running') {
+    if (type === "running") {
       const cadence = +inputCadence.value;
       if (
         !validNumber(distance, duration, cadence) ||
         !posNumber(distance, duration, cadence)
       )
-        return alert('wrongggggg!!!!!');
+        return alert("wrongggggg!!!!!");
       workout = new Running([lat, lng], distance, duration, cadence);
     }
-    if (type === 'Cycling') {
+    if (type === "cycling") {
       const elevation = +inputElevation.value;
       if (!validNumber(distance, duration) || !posNumber(distance, duration))
-        return alert('wrongggggg!!!!!');
+        return alert("wrongggggg!!!!!");
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
-
 
     this.#workouts.push(workout);
     this._renderWorkoutMarker(workout);
@@ -159,17 +159,17 @@ class App {
         })
       )
       .setPopupContent(
-        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.descriotion}`
+        `${workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"}${workout.description}`
       )
       .openPopup();
   }
   _renderWorkout(workout) {
     let html = `
     <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <h2 class="workout__title">${workout.descriotion}</h2>
+          <h2 class="workout__title">${workout.description}</h2>
           <div class="workout__details">
             <span class="workout__icon">${
-              workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+              workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"
             }</span>
             <span class="workout__value">${workout.distance}</span>
             <span class="workout__unit">km</span>
@@ -180,7 +180,7 @@ class App {
             <span class="workout__unit">min</span>
           </div>`;
 
-    if (workout.type === 'running') {
+    if (workout.type === "running") {
       html += `
                 <div class="workout__details">
                   <span class="workout__icon">⚡️</span>
@@ -195,9 +195,9 @@ class App {
               </li>`;
     }
 
-    if (workout.type === 'Cycling') {
+    if (workout.type === "cycling") {
       html += `
-                <<div class="workout__details">
+                <div class="workout__details">
             <span class="workout__icon">⏱</span>
             <span class="workout__value">95</span>
             <span class="workout__unit">min</span>
@@ -212,10 +212,10 @@ class App {
             <span class="workout__value">${workout.elevationGain}</span>
             <span class="workout__unit">m</span>
           </div>
-        </li> -->`;
+        </li>`;
     }
 
-    form.insertAdjacentHTML('afterend', html);
+    form.insertAdjacentHTML("afterend", html);
   }
 }
 const app = new App();
